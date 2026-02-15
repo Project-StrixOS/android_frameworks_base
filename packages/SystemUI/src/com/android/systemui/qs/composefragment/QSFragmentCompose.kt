@@ -181,7 +181,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import lineageos.providers.LineageSettings
+import strixos.providers.LineageSettings
 
 @SuppressLint("ValidFragment")
 class QSFragmentCompose

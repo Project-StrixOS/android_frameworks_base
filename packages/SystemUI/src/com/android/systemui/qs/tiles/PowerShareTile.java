@@ -46,7 +46,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.lineageos.internal.logging.LineageMetricsLogger;
 
-import vendor.lineage.powershare.IPowerShare;
+import vendor.strix.powershare.IPowerShare;
 
 import javax.inject.Inject;
 

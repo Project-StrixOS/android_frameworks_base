@@ -63,7 +63,7 @@ import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

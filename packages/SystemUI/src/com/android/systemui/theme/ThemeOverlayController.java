@@ -96,7 +96,7 @@ import com.google.ux.material.libmonet.dynamiccolor.MaterialDynamicColors;
 import kotlinx.coroutines.flow.Flow;
 import kotlinx.coroutines.flow.StateFlow;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import org.json.JSONException;
 import org.json.JSONObject;

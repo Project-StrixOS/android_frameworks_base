@@ -65,7 +65,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import lineageos.providers.LineageSettings
+import strixos.providers.LineageSettings
 
 /**
  * Interface to assist with binding the [CollapsedStatusBarFragment] to [HomeStatusBarViewModel].

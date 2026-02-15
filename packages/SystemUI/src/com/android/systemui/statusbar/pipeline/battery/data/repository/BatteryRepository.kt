@@ -50,7 +50,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.suspendCancellableCoroutine
-import lineageos.providers.LineageSettings
+import strixos.providers.LineageSettings
 
 /** Repository-style state for battery information. */
 interface BatteryRepository {

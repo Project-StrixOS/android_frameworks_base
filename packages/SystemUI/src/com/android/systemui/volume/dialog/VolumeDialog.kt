@@ -39,7 +39,7 @@ import com.android.systemui.volume.dialog.domain.interactor.DesktopAudioTileDeta
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
-import lineageos.providers.LineageSettings
+import strixos.providers.LineageSettings
 
 class VolumeDialog
 @Inject

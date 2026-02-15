@@ -221,7 +221,7 @@ import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.flow.StateFlow;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

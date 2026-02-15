@@ -56,7 +56,7 @@ import java.util.function.Consumer;
  */
 class SnapshotPersistQueue {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotPersister" : TAG_WM;
-    private static final long DELAY_MS = 100;
+    private static final long DELAY_MS = 1000;
     static final int MAX_HW_STORE_QUEUE_DEPTH = 2;
     private static final int COMPRESS_QUALITY = 95;
 
@@ -176,7 +176,7 @@ class SnapshotPersistQueue {
     }
 
     private void addToQueueInternal(WriteQueueItem item, boolean insertToFront) {
-        final Iterator<WriteQueueItem> iterator = mWriteQueue.iterator();
+        /*final Iterator<WriteQueueItem> iterator = mWriteQueue.iterator();
         while (iterator.hasNext()) {
             final WriteQueueItem next = iterator.next();
             if (item.isDuplicateOrExclusiveItem(next)) {
@@ -195,7 +195,7 @@ class SnapshotPersistQueue {
         }
         if (!mPaused) {
             mLock.notifyAll();
-        }
+        }*/
     }
 
     @GuardedBy("mLock")
@@ -255,7 +255,7 @@ class SnapshotPersistQueue {
 
     private final Thread mPersister = new Thread("TaskSnapshotPersister") {
         public void run() {
-            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            /*android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             while (true) {
                 WriteQueueItem next;
                 boolean isReadyToWrite = false;
@@ -302,7 +302,7 @@ class SnapshotPersistQueue {
                     } catch (InterruptedException e) {
                     }
                 }
-            }
+            }*/
         }
     };
 
@@ -340,8 +340,8 @@ class SnapshotPersistQueue {
     }
 
     StoreWriteQueueItem createStoreWriteQueueItem(int id, int userId, TaskSnapshot snapshot,
-            PersistInfoProvider provider,
-            Consumer<LowResSnapshotSupplier> lowResSnapshotConsumer) {
+                                                  PersistInfoProvider provider,
+                                                  Consumer<LowResSnapshotSupplier> lowResSnapshotConsumer) {
         return new StoreWriteQueueItem(id, userId, snapshot, provider, lowResSnapshotConsumer);
     }
 
@@ -362,8 +362,8 @@ class SnapshotPersistQueue {
         private TaskSnapshot mKnownLowResSnapshot;
 
         StoreWriteQueueItem(int id, int userId, TaskSnapshot snapshot,
-                PersistInfoProvider provider,
-                Consumer<LowResSnapshotSupplier> lowResSnapshotConsumer) {
+                            PersistInfoProvider provider,
+                            Consumer<LowResSnapshotSupplier> lowResSnapshotConsumer) {
             super(provider, userId);
             mId = id;
             snapshot.addReference(TaskSnapshot.REFERENCE_PERSIST);
@@ -582,7 +582,7 @@ class SnapshotPersistQueue {
     }
 
     DeleteWriteQueueItem createDeleteWriteQueueItem(int id, int userId,
-            PersistInfoProvider provider) {
+                                                    PersistInfoProvider provider) {
         return new DeleteWriteQueueItem(id, userId, provider);
     }
 

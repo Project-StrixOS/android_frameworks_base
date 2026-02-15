@@ -104,7 +104,7 @@ import com.android.server.usb.hal.gadget.UsbGadgetHalInstance;
 import com.android.server.utils.EventLogger;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import java.io.File;
 import java.io.FileDescriptor;

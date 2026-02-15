@@ -172,8 +172,8 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Lazy;
 
-import lineageos.app.LineageGlobalActions;
-import lineageos.providers.LineageSettings;
+import strixos.app.LineageGlobalActions;
+import strixos.providers.LineageSettings;
 
 import org.lineageos.internal.util.PowerMenuUtils;
 

@@ -61,9 +61,9 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
-import lineageos.app.Profile;
-import lineageos.app.ProfileManager;
-import lineageos.providers.LineageSettings;
+import strixos.app.Profile;
+import strixos.app.ProfileManager;
+import strixos.providers.LineageSettings;
 
 import org.lineageos.internal.logging.LineageMetricsLogger;
 

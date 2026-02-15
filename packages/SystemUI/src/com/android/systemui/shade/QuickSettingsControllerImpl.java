@@ -112,7 +112,7 @@ import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.utils.windowmanager.WindowManagerProvider;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import dalvik.annotation.optimization.NeverCompile;
 

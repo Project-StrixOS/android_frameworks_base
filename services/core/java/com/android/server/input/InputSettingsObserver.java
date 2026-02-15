@@ -37,7 +37,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.ViewConfiguration;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import java.util.Map;
 import java.util.function.Consumer;

@@ -95,7 +95,7 @@ import com.android.server.input.data.InputDataStore;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import org.xmlpull.v1.XmlPullParserException;
 
