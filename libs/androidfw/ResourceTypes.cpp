@@ -7359,14 +7359,18 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     // Do a proper lookup.
     uint8_t translatedId = mLookupTable[packageId];
     if (translatedId == 0) {
-        ALOGW("DynamicRefTable(0x%02x): No mapping for build-time package ID 0x%02x.",
-                (uint8_t)mAssignedPackageId, (uint8_t)packageId);
-        for (size_t i = 0; i < 256; i++) {
-            if (mLookupTable[i] != 0) {
-                ALOGW("e[0x%02x] -> 0x%02x", (uint8_t)i, mLookupTable[i]);
+        if (mFallbackToAssignedPackageId && mAssignedPackageId == LINEAGESDK_PACKAGE_ID) {
+            translatedId = mAssignedPackageId;
+        } else {
+            ALOGW("DynamicRefTable(0x%02x): No mapping for build-time package ID 0x%02x.",
+                    (uint8_t)mAssignedPackageId, (uint8_t)packageId);
+            for (size_t i = 0; i < 256; i++) {
+                if (mLookupTable[i] != 0) {
+                    ALOGW("e[0x%02x] -> 0x%02x", (uint8_t)i, mLookupTable[i]);
+                }
             }
+            return UNKNOWN_ERROR;
         }
-        return UNKNOWN_ERROR;
     }
 
     *resId = (res & 0x00ffffff) | (((uint32_t) translatedId) << 24);

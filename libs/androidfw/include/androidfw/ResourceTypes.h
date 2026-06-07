@@ -2032,6 +2032,10 @@ public:
 
     void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
 
+    void setFallbackToAssignedPackageId(bool enabled) {
+        mFallbackToAssignedPackageId = enabled;
+    }
+
     using AliasMap = std::vector<std::pair<uint32_t, uint32_t>>;
     void setAliases(AliasMap aliases) {
         mAliasId = std::move(aliases);
@@ -2053,6 +2057,7 @@ public:
     uint8_t mLookupTable[256];
     uint8_t mAssignedPackageId;
     bool mAppAsLib;
+    bool mFallbackToAssignedPackageId = false;
     KeyedVector<String16, uint8_t> mEntries;
     AliasMap mAliasId;
 };

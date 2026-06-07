@@ -46,8 +46,22 @@ namespace {
 
 constexpr int32_t kDefaultDisplayId = 0;
 constexpr int32_t kDefaultDeviceId = 0;
+constexpr uint8_t kSystemPackageId = 0x01;
+constexpr uint8_t kLineageSdkPackageId = 0x3f;
+constexpr uint8_t kAppPackageId = 0x7f;
 
 using EntryValue = std::variant<Res_value, incfs::verified_map_ptr<ResTable_map_entry>>;
+
+bool IsLineageSdkPackage(const LoadedPackage& package, const ApkAssets& apk_assets) {
+  if (package.GetPackageId() != kLineageSdkPackageId) {
+    return false;
+  }
+  if (package.GetPackageName() == "strixos.platform") {
+    return true;
+  }
+  const std::optional<std::string_view> path = apk_assets.GetPath();
+  return path.has_value() && *path == "/system/framework/org.system.platform-res.apk";
+}
 
 /* NOTE: table_entry has been verified in LoadedPackage::GetEntryFromOffset(),
  * and so access to ->value() and ->map_entry() are safe here
@@ -130,6 +144,11 @@ void AssetManager2::PresetApkAssets(ApkAssetsList apk_assets) {
   BuildDynamicRefTable(apk_assets);
 }
 
+bool AssetManager2::IsBetterPackageForSameRuntimeId(bool candidate_shadows_lineage_package,
+                                                    bool current_best_shadows_lineage_package) {
+  return candidate_shadows_lineage_package && !current_best_shadows_lineage_package;
+}
+
 bool AssetManager2::SetApkAssets(std::initializer_list<ApkAssetsPtr> apk_assets,
                                  bool invalidate_caches) {
   return SetApkAssets(ApkAssetsList(apk_assets.begin(), apk_assets.size()), invalidate_caches);
@@ -172,6 +191,21 @@ void AssetManager2::BuildDynamicRefTable(ApkAssetsList apk_assets) {
 
   // 0x01 is reserved for the android package.
   int next_package_id = 0x02;
+  const auto next_dynamic_package_id = [&]() -> int {
+    while (next_package_id < static_cast<int>(package_ids_.size()) &&
+           (next_package_id == kSystemPackageId || next_package_id == kAppPackageId ||
+            next_package_id == kLineageSdkPackageId ||
+            package_ids_[next_package_id] != 0xff)) {
+      if (next_package_id == kLineageSdkPackageId) {
+        LOG(WARNING) << "Skipping reserved Lineage package ID 0x3f while assigning a dynamic "
+                        "runtime package ID";
+      }
+      ++next_package_id;
+    }
+    CHECK(next_package_id < static_cast<int>(package_ids_.size()))
+        << "exhausted dynamic package ids";
+    return next_package_id++;
+  };
   for (const ApkAssets* apk_assets : sorted_apk_assets) {
     std::shared_ptr<OverlayDynamicRefTable> overlay_ref_table;
     if (auto loaded_idmap = apk_assets->GetLoadedIdmap()) {
@@ -205,10 +239,14 @@ void AssetManager2::BuildDynamicRefTable(ApkAssetsList apk_assets) {
 
     const LoadedArsc* loaded_arsc = apk_assets->GetLoadedArsc();
     for (const std::unique_ptr<const LoadedPackage>& package : loaded_arsc->GetPackages()) {
+      const bool shadows_lineage_package =
+          package->GetPackageId() == kLineageSdkPackageId &&
+          !IsLineageSdkPackage(*package, *apk_assets);
+
       // Get the package ID or assign one if a shared library.
       int package_id;
       if (package->IsDynamic()) {
-        package_id = next_package_id++;
+        package_id = next_dynamic_package_id();
       } else {
         package_id = package->GetPackageId();
       }
@@ -221,12 +259,23 @@ void AssetManager2::BuildDynamicRefTable(ApkAssetsList apk_assets) {
         DynamicRefTable* ref_table = new_group.dynamic_ref_table.get();
         ref_table->mAssignedPackageId = package_id;
         ref_table->mAppAsLib = package->IsDynamic() && package->GetPackageId() == 0x7f;
+        ref_table->setFallbackToAssignedPackageId(shadows_lineage_package);
+      } else if (shadows_lineage_package) {
+        package_groups_[idx].dynamic_ref_table->setFallbackToAssignedPackageId(true);
       }
 
       // Add the package to the set of packages with the same ID.
       PackageGroup* package_group = &package_groups_[idx];
-      package_group->packages_.emplace_back().loaded_package_ = package.get();
-      package_group->cookies_.push_back(apk_assets_cookies[apk_assets]);
+      if (shadows_lineage_package) {
+        package_group->packages_.insert(package_group->packages_.begin(), ConfiguredPackage{});
+        package_group->packages_.front().loaded_package_ = package.get();
+        package_group->packages_.front().shadows_lineage_package_ = true;
+        package_group->cookies_.insert(package_group->cookies_.begin(), apk_assets_cookies[apk_assets]);
+      } else {
+        package_group->packages_.emplace_back().loaded_package_ = package.get();
+        package_group->packages_.back().shadows_lineage_package_ = false;
+        package_group->cookies_.push_back(apk_assets_cookies[apk_assets]);
+      }
 
       // Add the package name -> build time ID mappings.
       for (const DynamicPackageEntry& entry : package->GetDynamicPackageMap()) {
@@ -235,7 +284,8 @@ void AssetManager2::BuildDynamicRefTable(ApkAssetsList apk_assets) {
             package_name, static_cast<uint8_t>(entry.package_id));
       }
 
-      if (auto apk_assets_path = apk_assets->GetPath()) {
+      const std::optional<std::string_view> apk_assets_path = apk_assets->GetPath();
+      if (apk_assets_path) {
         // Overlay target ApkAssets must have been created using path based load apis.
         target_assets_package_ids.emplace(*apk_assets_path, package_id);
       }
@@ -247,6 +297,12 @@ void AssetManager2::BuildDynamicRefTable(ApkAssetsList apk_assets) {
   for (const auto& group : package_groups_) {
     const std::string& package_name = group.packages_[0].loaded_package_->GetPackageName();
     const auto name_16 = String16(package_name.c_str(), package_name.size());
+    if (group.dynamic_ref_table->mAssignedPackageId == kLineageSdkPackageId ||
+        package_name == "strixos.platform") {
+      LOG(WARNING) << base::StringPrintf(
+          "AssetManager2 final package group: package=%s assigned_runtime_id=0x%02x",
+          package_name.c_str(), group.dynamic_ref_table->mAssignedPackageId);
+    }
     for (auto&& inner_group : package_groups_) {
       inner_group.dynamic_ref_table->addMapping(name_16,
                                                 group.dynamic_ref_table->mAssignedPackageId);
@@ -843,6 +899,10 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
     }
   }
 
+  if (UNLIKELY(!final_result.has_value())) {
+    return base::unexpected(std::nullopt);
+  }
+
   if (UNLIKELY(logging_enabled)) {
     last_resolution_.cookie = final_result->cookie;
     last_resolution_.type_string_ref = final_result->type_string_ref;
@@ -863,6 +923,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
   const bool logging_enabled = resource_resolution_logging_enabled_;
   ApkAssetsCookie best_cookie = kInvalidCookie;
   const LoadedPackage* best_package = nullptr;
+  bool best_package_shadows_lineage = false;
   incfs::verified_map_ptr<ResTable_type> best_type;
   const ResTable_config* best_config = nullptr;
   uint32_t best_offset = 0U;
@@ -919,6 +980,16 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
       Resolution::Step::Type resolution_type;
       if (best_config == nullptr) {
         resolution_type = Resolution::Step::Type::INITIAL;
+      } else if (IsBetterPackageForSameRuntimeId(loaded_package_impl.shadows_lineage_package_,
+                                                 best_package_shadows_lineage)) {
+        resolution_type = Resolution::Step::Type::BETTER_MATCH;
+      } else if (IsBetterPackageForSameRuntimeId(best_package_shadows_lineage,
+                                                 loaded_package_impl.shadows_lineage_package_)) {
+        if (UNLIKELY(logging_enabled)) {
+          last_resolution_.steps.push_back(Resolution::Step{Resolution::Step::Type::SKIPPED,
+                                                            cookie, this_config.toString()});
+        }
+        continue;
       } else if (this_config.isBetterThan(*best_config, &desired_config)) {
         resolution_type = Resolution::Step::Type::BETTER_MATCH;
       } else if (package_is_loader && this_config.compare(*best_config) == 0) {
@@ -949,6 +1020,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
 
       best_cookie = cookie;
       best_package = loaded_package;
+      best_package_shadows_lineage = loaded_package_impl.shadows_lineage_package_;
       best_type = type;
       best_config = &this_config;
       best_offset = offset.value();
