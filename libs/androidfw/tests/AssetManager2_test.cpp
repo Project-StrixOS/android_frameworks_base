@@ -234,31 +234,6 @@ TEST_F(AssetManager2Test, AssignsOverlayPackageIdLast) {
   ASSERT_EQ(0x02, get_first_package_id(lib_one_assets_));
 }
 
-TEST_F(AssetManager2Test, SkipsReservedOccupiedPackageIdsForDynamicPackages) {
-  AssetManager2 assetmanager;
-
-  std::vector<AssetManager2::ApkAssetsPtr> apk_assets = {app_assets_};
-  for (int i = 0; i < 126; ++i) {
-    apk_assets.push_back(appaslib_assets_);
-  }
-  assetmanager.SetApkAssets(apk_assets);
-
-  int package_count = 0;
-  assetmanager.ForEachPackage([&package_count](const std::string&, uint8_t) {
-    ++package_count;
-    return true;
-  });
-
-  EXPECT_EQ(127, package_count);
-}
-
-TEST_F(AssetManager2Test, PrefersShadowLineagePackageForSameRuntimeId) {
-  EXPECT_TRUE(AssetManager2::IsBetterPackageForSameRuntimeId(true, false));
-  EXPECT_FALSE(AssetManager2::IsBetterPackageForSameRuntimeId(false, true));
-  EXPECT_FALSE(AssetManager2::IsBetterPackageForSameRuntimeId(false, false));
-  EXPECT_FALSE(AssetManager2::IsBetterPackageForSameRuntimeId(true, true));
-}
-
 TEST_F(AssetManager2Test, GetSharedLibraryResourceName) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({lib_one_assets_});

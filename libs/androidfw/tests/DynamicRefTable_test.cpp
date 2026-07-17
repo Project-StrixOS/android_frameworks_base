@@ -113,21 +113,4 @@ TEST(DynamicRefTableTest, DoNotLookupNonDynamicAttributes) {
   EXPECT_EQ(value2.data, 0x03010000);
 };
 
-TEST(DynamicRefTableTest, FallbackToAssignedPackageIdWhenEnabled) {
-  DynamicRefTable shadow_lineage_table(0x3f, /* appAsLib */ false);
-  shadow_lineage_table.setFallbackToAssignedPackageId(true);
-
-  uint32_t res_id = 0x25010000;
-  ASSERT_EQ(shadow_lineage_table.lookupResourceId(&res_id), NO_ERROR);
-  EXPECT_EQ(res_id, 0x3f010000);
-}
-
-TEST(DynamicRefTableTest, MissingMappingStillFailsWhenFallbackDisabled) {
-  DynamicRefTable regular_table(0x3f, /* appAsLib */ false);
-
-  uint32_t res_id = 0x25010000;
-  ASSERT_EQ(regular_table.lookupResourceId(&res_id), UNKNOWN_ERROR);
-  EXPECT_EQ(res_id, 0x25010000);
-}
-
 } // namespace android

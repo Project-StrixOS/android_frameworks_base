@@ -79,7 +79,6 @@ struct FindEntryResult;
 // AssetManager2 provides caching of resources retrieved via the underlying ApkAssets.
 class AssetManager2 {
   friend Theme;
-  friend class AssetManager2Test;
 
  public:
   struct ResourceName {
@@ -378,11 +377,6 @@ class AssetManager2 {
       // A pointer to the immutable, loaded package info.
       const LoadedPackage* loaded_package_;
 
-      // True when this package uses the reserved Lineage package ID 0x3f but is not actually
-      // lineageos.platform. These packages must win over the real Lineage package when both
-      // expose the same runtime package ID.
-      bool shadows_lineage_package_ = false;
-
       // A mutable AssetManager-specific list of configurations that match the AssetManager's
       // current configuration. This is used as an optimization to avoid checking every single
       // candidate configuration when looking up resources.
@@ -447,9 +441,6 @@ class AssetManager2 {
       const PackageGroup& package_group, uint8_t type_idx, uint16_t entry_idx,
       const ResTable_config& desired_config, bool stop_at_first_match,
       bool ignore_configuration) const;
-
-  static bool IsBetterPackageForSameRuntimeId(bool candidate_shadows_lineage_package,
-                                              bool current_best_shadows_lineage_package);
 
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
