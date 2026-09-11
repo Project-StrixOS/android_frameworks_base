@@ -40,7 +40,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.awaitCancellation
-import lineageos.providers.LineageSettings
+import strixos.providers.LineageSettings
 
 class VolumeDialog
 @AssistedInject

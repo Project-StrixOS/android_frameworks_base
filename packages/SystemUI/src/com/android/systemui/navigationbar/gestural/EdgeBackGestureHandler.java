@@ -107,7 +107,7 @@ import com.android.wm.shell.desktopmode.api.DesktopMode;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.shared.desktopmode.DesktopState;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;

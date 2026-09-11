@@ -26,7 +26,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import lineageos.providers.LineageSettings
+import strixos.providers.LineageSettings
 import javax.inject.Inject
 
 @SysUISingleton

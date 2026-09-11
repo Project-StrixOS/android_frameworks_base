@@ -36,7 +36,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

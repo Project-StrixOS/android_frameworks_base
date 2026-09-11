@@ -41,8 +41,8 @@ import com.android.systemui.res.R;
 
 import org.lineageos.internal.util.PackageManagerUtils;
 
-import lineageos.hardware.LineageHardwareManager;
-import lineageos.providers.LineageSettings;
+import strixos.hardware.LineageHardwareManager;
+import strixos.providers.LineageSettings;
 
 import javax.inject.Inject;
 

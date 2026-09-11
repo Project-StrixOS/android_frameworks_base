@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.wrapper.LockPatternCheckerWrapper;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import java.time.Duration;
 import java.util.Optional;

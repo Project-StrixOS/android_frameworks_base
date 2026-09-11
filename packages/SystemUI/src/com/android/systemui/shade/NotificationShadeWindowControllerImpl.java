@@ -88,7 +88,7 @@ import com.android.systemui.Flags;
 
 import dagger.Lazy;
 
-import lineageos.providers.LineageSettings;
+import strixos.providers.LineageSettings;
 
 import java.io.PrintWriter;
 import java.lang.ref.Reference;

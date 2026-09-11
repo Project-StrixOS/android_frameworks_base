@@ -180,8 +180,8 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
-import lineageos.app.LineageGlobalActions;
-import lineageos.providers.LineageSettings;
+import strixos.app.LineageGlobalActions;
+import strixos.providers.LineageSettings;
 
 import org.lineageos.internal.util.PowerMenuUtils;
 
