@@ -146,6 +146,14 @@ class InstallRepository(private val context: Context) : EventResultPersister.Eve
      * PackageInfo of the app being installed on device.
      */
     private var newPackageInfo: PackageInfo? = null
+
+    /**
+     * Parsed manifest of the package that is about to be installed. Usually the same as
+     * [newPackageInfo], but for a pre-commit session [newPackageInfo] is only a stub, so the
+     * manifest is read from the sealed session instead. Only used to render the package details
+     * on the install confirmation dialog.
+     */
+    private var detailsPackageInfo: PackageInfo? = null
     private var wasUserConfirmationTriggeredByPia = false
 
     /**
@@ -765,12 +773,14 @@ class InstallRepository(private val context: Context) : EventResultPersister.Eve
                 return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
             }
         }
+        detailsPackageInfo = newPackageInfo
         isAppUpdating = isAppUpdating(newPackageInfo)
         val (existingUpdateOwner, requestedUpdateOwner) =
             getUpdateOwners(newPackageInfo, userActionReason, isAppUpdating)
 
         return InstallUserActionRequired(USER_ACTION_REASON_INSTALL_CONFIRMATION, appSnippet,
-            isAppUpdating, existingUpdateOwner, requestedUpdateOwner)
+            isAppUpdating, existingUpdateOwner, requestedUpdateOwner,
+            detailsPackageInfo = detailsPackageInfo)
     }
 
     /**
@@ -781,13 +791,19 @@ class InstallRepository(private val context: Context) : EventResultPersister.Eve
      */
     private fun processSessionInfo(sessionInfo: SessionInfo, userActionReason: Int): InstallStage {
         newPackageInfo = generateStubPackageInfo(sessionInfo.getAppPackageName())
+        // The stub above only carries the package name. Read the manifest of the sealed session
+        // as well, so that the confirmation dialog can show the full package details.
+        detailsPackageInfo = sessionInfo.resolvedBaseApkPath?.let {
+            getPackageInfo(context, File(it), PackageManager.GET_PERMISSIONS)
+        } ?: newPackageInfo
         appSnippet = getAppSnippet(context, sessionInfo)
         isAppUpdating = isAppUpdating(newPackageInfo)
         val (existingUpdateOwner, requestedUpdateOwner) =
             getUpdateOwners(newPackageInfo, userActionReason, isAppUpdating)
 
         return InstallUserActionRequired(USER_ACTION_REASON_INSTALL_CONFIRMATION, appSnippet,
-            isAppUpdating, existingUpdateOwner, requestedUpdateOwner)
+            isAppUpdating, existingUpdateOwner, requestedUpdateOwner,
+            detailsPackageInfo = detailsPackageInfo)
     }
 
     private fun getUpdateOwners(

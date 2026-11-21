@@ -21,7 +21,10 @@ import static android.text.format.Formatter.formatFileSize;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +37,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.android.packageinstaller.InstallDetailsUtil;
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.UninstallAborted;
 import com.android.packageinstaller.v2.model.UninstallStage;
@@ -58,6 +62,7 @@ public class UninstallationFragment extends DialogFragment {
     private View mKeepDataLayout = null;
     private TextView mCustomMessageTextView = null;
     private TextView mKeepDataBytesTextView = null;
+    private TextView mInstallDetailsTextView = null;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -81,6 +86,7 @@ public class UninstallationFragment extends DialogFragment {
         mKeepDataLayout = dialogView.requireViewById(R.id.keep_data_layout);
         mKeepDataBytesTextView = mKeepDataLayout.requireViewById(R.id.keep_data_bytes);
         mKeepDataCheckbox = mKeepDataLayout.requireViewById(R.id.keep_data_checkbox);
+        mInstallDetailsTextView = dialogView.requireViewById(R.id.install_details);
 
         mDialog = UiUtil.getAlertDialog(requireContext(), getString(R.string.title_uninstall),
                 dialogView, R.string.button_uninstall, R.string.button_cancel,
@@ -133,6 +139,7 @@ public class UninstallationFragment extends DialogFragment {
     private void updateUninstallAbortedUI(Dialog dialog, UninstallAborted uninstallStage) {
         mKeepDataLayout.setVisibility(View.GONE);
         mCustomMessageTextView.setVisibility(View.VISIBLE);
+        mInstallDetailsTextView.setVisibility(View.GONE);
 
         if (uninstallStage.getAppIcon() != null) {
             mAppSnippet.setVisibility(View.VISIBLE);
@@ -185,6 +192,9 @@ public class UninstallationFragment extends DialogFragment {
             mCustomMessageTextView.setVisibility(View.GONE);
         }
 
+        // Show the package details
+        showUninstallDetails(uninstallStage);
+
         // Set keep data information
         long appDataSize = uninstallStage.getAppDataSize();
         if (appDataSize != 0) {
@@ -220,5 +230,30 @@ public class UninstallationFragment extends DialogFragment {
                 mUninstallActionListener.onNegativeResponse();
             });
         }
+    }
+
+    /**
+     * Fill in the block of package details that is shown underneath the confirmation message.
+     */
+    private void showUninstallDetails(@NonNull UninstallUserActionRequired uninstallStage) {
+        final String packageName = uninstallStage.getTargetAppInfo().packageName;
+        if (packageName == null) {
+            mInstallDetailsTextView.setVisibility(View.GONE);
+            return;
+        }
+
+        final Context context = requireContext();
+        final PackageInfo packageInfo =
+                InstallDetailsUtil.getInstalledPackageInfo(context, packageName);
+        if (packageInfo == null) {
+            mInstallDetailsTextView.setVisibility(View.GONE);
+            return;
+        }
+
+        final UserHandle targetUser = uninstallStage.getTargetUser() != null
+                ? uninstallStage.getTargetUser() : Process.myUserHandle();
+        mInstallDetailsTextView.setText(InstallDetailsUtil.buildUninstallDetails(context,
+                packageInfo, targetUser));
+        mInstallDetailsTextView.setVisibility(View.VISIBLE);
     }
 }

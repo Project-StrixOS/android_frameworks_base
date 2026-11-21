@@ -58,6 +58,7 @@ import android.widget.TextView;
 import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -151,8 +152,9 @@ public class PackageInstallerActivity extends Activity {
 
     private void startInstallConfirm() {
         TextView viewToEnable;
+        final boolean isUpdate = mAppInfo != null;
 
-        if (mAppInfo != null) {
+        if (isUpdate) {
             viewToEnable = mDialog.requireViewById(R.id.install_confirm_question_update);
 
             final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
@@ -175,12 +177,65 @@ public class PackageInstallerActivity extends Activity {
             viewToEnable = mDialog.requireViewById(R.id.install_confirm_question);
         }
 
+        // Both questions live in the same panel, only ever show one of them.
+        mDialog.requireViewById(R.id.install_confirm_question)
+                .setVisibility(isUpdate ? View.GONE : View.VISIBLE);
+        mDialog.requireViewById(R.id.install_confirm_question_update)
+                .setVisibility(isUpdate ? View.VISIBLE : View.GONE);
+
         viewToEnable.setVisibility(View.VISIBLE);
         viewToEnable.setMovementMethod(new ScrollingMovementMethod());
+
+        showInstallDetails();
 
         mEnableOk = true;
         mOk.setEnabled(true);
         mOk.setFilterTouchesWhenObscured(true);
+    }
+
+    /**
+     * Fill in the block of package details that is shown underneath the confirmation question.
+     */
+    private void showInstallDetails() {
+        final TextView detailsView = mDialog.requireViewById(R.id.install_details);
+        final PackageInfo detailsPackageInfo = resolveDetailsPackageInfo();
+        if (detailsPackageInfo == null || TextUtils.isEmpty(detailsPackageInfo.packageName)) {
+            detailsView.setVisibility(View.GONE);
+            return;
+        }
+
+        final PackageInfo installedPackageInfo = mAppInfo != null
+                ? InstallDetailsUtil.getInstalledPackageInfo(this, detailsPackageInfo.packageName)
+                : null;
+        detailsView.setText(InstallDetailsUtil.buildInstallDetails(this, detailsPackageInfo,
+                installedPackageInfo, Process.myUserHandle()));
+        detailsView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Returns the package info used to render the details on the confirmation dialog. A
+     * pre-commit session only carries a stub, so try to read the manifest of the sealed session.
+     */
+    @Nullable
+    private PackageInfo resolveDetailsPackageInfo() {
+        if (mPkgInfo == null) {
+            return null;
+        }
+        final boolean isStub = mPkgInfo.applicationInfo == null
+                || (mPkgInfo.getLongVersionCode() <= 0 && TextUtils.isEmpty(mPkgInfo.versionName));
+        if (isStub && mSessionId != SessionInfo.INVALID_ID) {
+            final SessionInfo sessionInfo = mInstaller.getSessionInfo(mSessionId);
+            final String resolvedPath = sessionInfo != null
+                    ? sessionInfo.getResolvedBaseApkPath() : null;
+            if (!TextUtils.isEmpty(resolvedPath)) {
+                final PackageInfo parsed = PackageUtil.getPackageInfo(this, new File(resolvedPath),
+                        PackageManager.GET_PERMISSIONS);
+                if (parsed != null) {
+                    return parsed;
+                }
+            }
+        }
+        return mPkgInfo;
     }
 
     private CharSequence getExistingUpdateOwnerLabel() {

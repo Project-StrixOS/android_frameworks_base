@@ -364,4 +364,31 @@
     <!-- Dialog action to close a dialog. [CHAR LIMIT=30] -->
     <string name="close">Close</string>
 
+    <!-- Header of the package details block that is shown underneath the question of the
+         install and uninstall confirmation dialogs. [CHAR LIMIT=40] -->
+    <string name="install_details_header">Package details</string>
+    <!-- Label for the user the package is installed for or removed from. [CHAR LIMIT=40] -->
+    <string name="install_details_user">User</string>
+    <!-- Label for the package name. [CHAR LIMIT=40] -->
+    <string name="install_details_package">Package</string>
+    <!-- Label for the version of a package that is about to be installed. [CHAR LIMIT=40] -->
+    <string name="install_details_version">Version</string>
+    <!-- Label for the version of the package that is currently installed. [CHAR LIMIT=40] -->
+    <string name="install_details_installed_version">Installed version</string>
+    <!-- Label for the version of the package that is about to be installed as an update.
+         [CHAR LIMIT=40] -->
+    <string name="install_details_new_version">New version</string>
+    <!-- Label for the SDK version the package targets. [CHAR LIMIT=40] -->
+    <string name="install_details_target_sdk">Target SDK</string>
+    <!-- Label for the lowest SDK version the package can run on. [CHAR LIMIT=40] -->
+    <string name="install_details_min_sdk">Minimum SDK</string>
+    <!-- Label for the numeric uid the package runs as. [CHAR LIMIT=40] -->
+    <string name="install_details_uid">UID</string>
+    <!-- Label for the first time the package was installed. [CHAR LIMIT=40] -->
+    <string name="install_details_first_installed">First installed</string>
+    <!-- Label for the last time the package was updated. [CHAR LIMIT=40] -->
+    <string name="install_details_last_updated">Last updated</string>
+    <!-- Value shown when a piece of package information cannot be determined. [CHAR LIMIT=40] -->
+    <string name="install_details_unknown">Unknown</string>
+
 </resources>

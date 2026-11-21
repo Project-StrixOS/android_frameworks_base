@@ -37,6 +37,17 @@
             android:textAlignment="viewStart"
             android:visibility="gone" />
 
+        <TextView
+            android:id="@+id/install_details"
+            style="?attr/textAppearanceInstallerCustomMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dialog_inter_element_margin"
+            android:textSize="12sp"
+            android:typeface="monospace"
+            android:textIsSelectable="true"
+            android:visibility="gone" />
+
         <include layout="@layout/keep_data_option_layout" />
 
     </LinearLayout>

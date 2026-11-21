@@ -130,4 +130,16 @@
     <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"清空存储空间"</string>
     <string name="unarchive_settings_button" msgid="3504171760009177425">"设置"</string>
     <string name="close" msgid="5214897374055647996">"关闭"</string>
+    <string name="install_details_header">"软件包详情"</string>
+    <string name="install_details_user">"用户"</string>
+    <string name="install_details_package">"包名"</string>
+    <string name="install_details_version">"版本"</string>
+    <string name="install_details_installed_version">"已安装"</string>
+    <string name="install_details_new_version">"新版本"</string>
+    <string name="install_details_target_sdk">"目标SDK"</string>
+    <string name="install_details_min_sdk">"最低SDK"</string>
+    <string name="install_details_uid">"UID"</string>
+    <string name="install_details_first_installed">"首次安装"</string>
+    <string name="install_details_last_updated">"最后更新"</string>
+    <string name="install_details_unknown">"未知"</string>
 </resources>

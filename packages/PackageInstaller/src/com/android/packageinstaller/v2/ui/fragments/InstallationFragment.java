@@ -25,11 +25,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.ResolveInfo;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -46,6 +48,7 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.android.packageinstaller.InstallDetailsUtil;
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.InstallAborted;
 import com.android.packageinstaller.v2.model.InstallFailed;
@@ -86,6 +89,7 @@ public class InstallationFragment extends DialogFragment {
 
     private TextView mInstallWithoutVerifyingTextView = null;
     private TextView mMoreDetailsExpandedTextView = null;
+    private TextView mInstallDetailsTextView = null;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -117,6 +121,7 @@ public class InstallationFragment extends DialogFragment {
         mInstallWithoutVerifyingTextView = dialogView.requireViewById(
                 R.id.install_without_verifying_text);
         mMoreDetailsExpandedTextView = dialogView.requireViewById(R.id.more_details_expanded_text);
+        mInstallDetailsTextView = dialogView.requireViewById(R.id.install_details);
 
         String title = getString(R.string.title_install_staging);
         mDialog = UiUtil.getAlertDialog(requireContext(), title, dialogView,
@@ -201,6 +206,9 @@ public class InstallationFragment extends DialogFragment {
         // hide the more details layout by default
         mMoreDetailsClickableLayout.setVisibility(View.GONE);
         mMoreDetailsExpandedLayout.setVisibility(View.GONE);
+
+        // hide the package details by default, they are only shown on the confirmation screen
+        mInstallDetailsTextView.setVisibility(View.GONE);
 
         // Reset the paddings of the custom view panel
         final int paddingHorizontal = mCustomViewPanel.getPaddingStart();
@@ -653,6 +661,8 @@ public class InstallationFragment extends DialogFragment {
         }
         dialog.setTitle(title);
 
+        showInstallDetails(installStage);
+
         // Set the button and the listener
         Button positiveButton = UiUtil.getAlertDialogPositiveButton(dialog);
         if (positiveButton != null) {
@@ -690,6 +700,26 @@ public class InstallationFragment extends DialogFragment {
                 mInstallActionListener.onNegativeResponse(installStage.getStageCode());
             });
         }
+    }
+
+    /**
+     * Fill in the block of package details that is shown underneath the confirmation question.
+     */
+    private void showInstallDetails(@NonNull InstallUserActionRequired installStage) {
+        final PackageInfo newPackageInfo = installStage.getDetailsPackageInfo();
+        if (newPackageInfo == null || newPackageInfo.packageName == null) {
+            mInstallDetailsTextView.setVisibility(View.GONE);
+            return;
+        }
+
+        final Context context = requireContext();
+        final PackageInfo installedPackageInfo = installStage.isAppUpdating()
+                ? InstallDetailsUtil.getInstalledPackageInfo(context, newPackageInfo.packageName)
+                : null;
+
+        mInstallDetailsTextView.setText(InstallDetailsUtil.buildInstallDetails(context,
+                newPackageInfo, installedPackageInfo, Process.myUserHandle()));
+        mInstallDetailsTextView.setVisibility(View.VISIBLE);
     }
 
     /**

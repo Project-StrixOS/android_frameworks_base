@@ -38,6 +38,17 @@
             android:layout_height="wrap_content"
             style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle" />
 
+        <TextView
+            android:id="@+id/install_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            style="@android:style/TextAppearance.DeviceDefault.SearchResult.Subtitle"
+            android:textSize="12sp"
+            android:typeface="monospace"
+            android:textIsSelectable="true"
+            android:visibility="gone" />
+
         <CheckBox
             android:id="@+id/keepData"
             android:layout_width="wrap_content"

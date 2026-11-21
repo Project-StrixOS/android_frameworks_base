@@ -35,6 +35,7 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.packageinstaller.InstallDetailsUtil;
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.UninstallerActivity;
 
@@ -225,11 +227,10 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
             appDataSize = getAppDataSize(pkg, dialogInfo.allUsers ? null : dialogInfo.user);
         }
 
-        if (appDataSize == 0) {
-            dialogBuilder.setMessage(messageBuilder.toString());
-        } else {
+        if (appDataSize > 0) {
             LayoutInflater inflater = getContext().getSystemService(LayoutInflater.class);
-            ViewGroup content = (ViewGroup) inflater.inflate(R.layout.uninstall_content_view, null);
+            ViewGroup content =
+                    (ViewGroup) inflater.inflate(R.layout.uninstall_content_view, null);
 
             ((TextView) content.requireViewById(R.id.message)).setText(messageBuilder.toString());
             mKeepData = content.requireViewById(R.id.keepData);
@@ -237,10 +238,58 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
             mKeepData.setText(getString(R.string.uninstall_keep_data,
                     formatFileSize(getContext(), appDataSize)));
 
+            showDetails(content, dialogInfo);
+
             dialogBuilder.setView(content);
+        } else {
+            dialogBuilder.setMessage(appendDetailsToMessage(messageBuilder, dialogInfo));
         }
 
         return dialogBuilder.create();
+    }
+
+    /**
+     * Appends the package details to the plain text message used when the dialog does not need
+     * a custom view.
+     */
+    private CharSequence appendDetailsToMessage(@NonNull StringBuilder messageBuilder,
+            @NonNull UninstallerActivity.DialogInfo dialogInfo) {
+        final CharSequence details = buildDetails(dialogInfo);
+        if (details == null || details.length() == 0) {
+            return messageBuilder.toString();
+        }
+        return TextUtils.concat(messageBuilder, "\n\n", details);
+    }
+
+    /**
+     * Fill in the block of package details shown underneath the uninstall message.
+     */
+    private void showDetails(@NonNull ViewGroup content,
+            @NonNull UninstallerActivity.DialogInfo dialogInfo) {
+        final TextView detailsView = content.requireViewById(R.id.install_details);
+        final CharSequence details = buildDetails(dialogInfo);
+        if (details == null || details.length() == 0) {
+            detailsView.setVisibility(View.GONE);
+            return;
+        }
+        detailsView.setText(details);
+        detailsView.setVisibility(View.VISIBLE);
+    }
+
+    @Nullable
+    private CharSequence buildDetails(@NonNull UninstallerActivity.DialogInfo dialogInfo) {
+        final String packageName = dialogInfo.appInfo.packageName;
+        if (packageName == null) {
+            return null;
+        }
+        final PackageInfo packageInfo =
+                InstallDetailsUtil.getInstalledPackageInfo(getContext(), packageName);
+        if (packageInfo == null) {
+            return null;
+        }
+        final UserHandle targetUser = dialogInfo.user != null
+                ? dialogInfo.user : Process.myUserHandle();
+        return InstallDetailsUtil.buildUninstallDetails(getContext(), packageInfo, targetUser);
     }
 
     private static boolean isArchivingEnabled() {

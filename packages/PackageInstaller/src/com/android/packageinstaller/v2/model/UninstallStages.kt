@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
+import android.os.UserHandle
 import com.android.packageinstaller.R
 
 sealed class UninstallStage(val stageCode: Int) {
@@ -50,6 +51,11 @@ data class UninstallUserActionRequired(
     val userName: String? = null,
     val targetAppInfo: ApplicationInfo,
     val targetActivityInfo: ActivityInfo? = null,
+    /**
+     * The user the package is removed from. Used to render the package details on the uninstall
+     * confirmation dialog.
+     */
+    val targetUser: UserHandle? = null,
 ) : UninstallStage(STAGE_USER_ACTION_REQUIRED) {
 
     val appIcon: Drawable?

@@ -360,7 +360,8 @@ class UninstallRepository(private val context: Context) {
             isOtherUser,
             userName,
             targetAppInfo!!,
-            targetActivityInfo
+            targetActivityInfo,
+            uninstalledUser
         )
     }
 

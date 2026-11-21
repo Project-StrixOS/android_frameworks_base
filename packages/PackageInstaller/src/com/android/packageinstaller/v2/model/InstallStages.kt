@@ -19,6 +19,7 @@ package com.android.packageinstaller.v2.model
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
@@ -53,6 +54,11 @@ data class InstallUserActionRequired(
     val requestedUpdateOwnerPackageName: CharSequence? = null,
     val unknownSourcePackageName: String? = null,
     val verificationInfo: PackageInstaller.DeveloperVerificationUserConfirmationInfo? = null,
+    /**
+     * Parsed manifest of the package that is about to be installed, used to render the package
+     * details on the install confirmation dialog. Can be null when it could not be read.
+     */
+    val detailsPackageInfo: PackageInfo? = null,
 ) : InstallStage(STAGE_USER_ACTION_REQUIRED) {
 
     val appIcon: Drawable?
