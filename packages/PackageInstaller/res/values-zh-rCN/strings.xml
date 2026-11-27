@@ -139,7 +139,5 @@
     <string name="install_details_target_sdk">"目标SDK"</string>
     <string name="install_details_min_sdk">"最低SDK"</string>
     <string name="install_details_uid">"UID"</string>
-    <string name="install_details_first_installed">"首次安装"</string>
-    <string name="install_details_last_updated">"最后更新"</string>
     <string name="install_details_unknown">"未知"</string>
 </resources>

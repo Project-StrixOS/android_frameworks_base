@@ -75,20 +75,19 @@ public final class InstallDetailsUtil {
         appendLine(sb, context, R.string.install_details_package, newPackageInfo.packageName);
 
         if (installedPackageInfo != null) {
-            appendLine(sb, context, R.string.install_details_installed_version,
-                    formatVersion(installedPackageInfo));
-            appendLine(sb, context, R.string.install_details_new_version,
-                    formatVersion(newPackageInfo));
+            appendLine(sb, context, R.string.install_details_installed_version, formatVersion(installedPackageInfo));
+            appendLine(sb, context, R.string.install_details_new_version, formatVersion(newPackageInfo));
             appendLine(sb, context, R.string.install_details_target_sdk,
                     arrow(formatTargetSdk(installedPackageInfo), formatTargetSdk(newPackageInfo)));
+            appendLine(sb, context, R.string.install_details_min_sdk,
+                    arrow(formatMinSdk(installedPackageInfo), formatMinSdk(newPackageInfo)));
         } else {
-            appendLine(sb, context, R.string.install_details_version,
-                    formatVersion(newPackageInfo));
-            appendLine(sb, context, R.string.install_details_target_sdk,
-                    formatTargetSdk(newPackageInfo));
+            appendLine(sb, context, R.string.install_details_version, formatVersion(newPackageInfo));
+            appendLine(sb, context, R.string.install_details_target_sdk, formatTargetSdk(newPackageInfo));
+            appendLine(sb, context, R.string.install_details_min_sdk, formatMinSdk(newPackageInfo));
         }
 
-        appendCommonDetails(sb, context, newPackageInfo, installedPackageInfo);
+        appendCommonDetails(sb, context, newPackageInfo);
         return sb;
     }
 
@@ -109,9 +108,9 @@ public final class InstallDetailsUtil {
         appendLine(sb, context, R.string.install_details_user, getUserLabel(context, user));
         appendLine(sb, context, R.string.install_details_package, packageInfo.packageName);
         appendLine(sb, context, R.string.install_details_version, formatVersion(packageInfo));
-        appendLine(sb, context, R.string.install_details_target_sdk,
-                formatTargetSdk(packageInfo));
-        appendCommonDetails(sb, context, packageInfo, packageInfo);
+        appendLine(sb, context, R.string.install_details_target_sdk, formatTargetSdk(packageInfo));
+        appendLine(sb, context, R.string.install_details_min_sdk, formatMinSdk(packageInfo));
+        appendCommonDetails(sb, context, packageInfo);
         return sb;
     }
 
@@ -139,17 +138,8 @@ public final class InstallDetailsUtil {
     }
 
     private static void appendCommonDetails(@NonNull SpannableStringBuilder sb,
-            @NonNull Context context, @NonNull PackageInfo packageInfo,
-            @Nullable PackageInfo installedPackageInfo) {
+            @NonNull Context context, @NonNull PackageInfo packageInfo) {
         appendLine(sb, context, R.string.install_details_uid, formatUid(packageInfo));
-        appendLine(sb, context, R.string.install_details_min_sdk, formatMinSdk(packageInfo));
-
-        final PackageInfo timeSource = installedPackageInfo != null
-                ? installedPackageInfo : packageInfo;
-        appendLine(sb, context, R.string.install_details_first_installed,
-                formatTime(timeSource.firstInstallTime));
-        appendLine(sb, context, R.string.install_details_last_updated,
-                formatTime(timeSource.lastUpdateTime));
     }
 
     private static void appendHeader(@NonNull SpannableStringBuilder sb,
